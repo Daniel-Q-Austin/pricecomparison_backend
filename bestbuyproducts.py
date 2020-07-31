@@ -1,15 +1,14 @@
-import flask
-from flask import request, jsonify
+from flask import request, jsonify, Blueprint
 import urllib.request, json 
 
-app = flask.Flask(__name__)
-app.config["DEBUG"] = True
-@app.route('/', methods=['GET'])
+bestbuyproducer = Blueprint('bestbuyproducer',__name__)
+
+@bestbuyproducer.route('/test', methods=['GET'])
 def home():
     return '''<h1>PriceAid Application</h1>
 <p>API to return bestbuy pricing data based on search results.</p>'''
 
-@app.route('/products', methods=['GET'])
+@bestbuyproducer.route('/products', methods=['GET'])
 def api_all():
 	if 'search' in request.args:
 		search = request.args['search']
@@ -22,4 +21,3 @@ def api_all():
 		del item["sku"]
 	products = sorted(products, key = lambda i: i['salePrice']) 
 	return jsonify(products)
-app.run()
