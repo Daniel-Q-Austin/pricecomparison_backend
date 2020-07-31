@@ -1,14 +1,9 @@
 from flask import request, jsonify, Blueprint
 import urllib.request, json 
 
-bestbuyproducer = Blueprint('bestbuyproducer',__name__)
+bestbuyproducts = Blueprint('bestbuyproducts',__name__)
 
-@bestbuyproducer.route('/test', methods=['GET'])
-def home():
-    return '''<h1>PriceAid Application</h1>
-<p>API to return bestbuy pricing data based on search results.</p>'''
-
-@bestbuyproducer.route('/products', methods=['GET'])
+@bestbuyproducts.route('/bestbuyproducts/products', methods=['GET'])
 def api_all():
 	if 'search' in request.args:
 		search = request.args['search']
