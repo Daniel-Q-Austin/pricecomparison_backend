@@ -1,48 +1,73 @@
 #This module will run the 'saved item' portion of PriceAid
 #Daniel Austin, Summer of 2020
 
-import os
-import mysql.connector
+from flask import request, jsonify, Blueprint
+from Connect import Connect
 
-#Connect to database
-print("Connecting...")
-connection = mysql.connector.connect(host='localhost',
-                                         database='saveditems',
-                                         user='root',
-                                         password='')
-cursor = connection.cursor()
-print("Connected")
+conn = Connect('database.txt')
+cursor = conn.cursor
+savedItems = Blueprint('savedItems',__name__)
 
-
-def addNewItem(item, url, price): 
+@savedItems.route('/savedItems/addNewItem',methods=['POST'])
+def addNewItem(): 
+    email = request.args['email']
+    company_name = request.args['company_name']
+    name = request.args['name']
+    userID = request.args['userID']
+    url = request.args['url']
+    price = request.args['price']
+    
+    response = {'result' : 'null'}
     #Adds a saved item
-    sql = 'INSERT INTO saved_table (Name, URL, Price) VALUES (%s, %s, %s)'
-    val = (item, url, price)
+    sql = 'INSERT INTO saved_table (userID, name, url, email, price, company_name) VALUES (%d, %s, %s, %s, %.2f, %s)'
+    val = (userID, name, url, email, price, company_name)
     try:
         cursor.execute(sql, val)
-    except mysql.connector.errors.IntegrityError:
-        return "Item already saved"
+        response['result'] = 'done'
+    except Exception as err:
+        response['error'] = err
     connection.commit()
-    return "Item inserted"
+    return response
 
-def removeItem(item):
-    #Removes a saved item
-    cursor.execute("DELETE FROM saved_table WHERE Name = '{}'".format(item))
-    count = cursor.rowcount
-    if (count == 0):
-        return "Item not in cart"
-    connection.commit()
-    return "Item deleted successfully"
+@savedItems.route("/savedItems/removeItem", methods=["DELETE"])
+def removeItem():
+    itemCode = request.args['itemCode']
+    response = {'result' : 'null'}
 
+    try:
+        cursor.execute("DELETE FROM saved_table WHERE itemCode = '{}'".format(itemCode))
+        count = cursor.rowcount
+        connection.commit()
+        response['result'] = 'done'
+    except Exception as err:
+        response['error'] = err
+    
+    return response
 
+@savedItems.route("/savedItems/cleanCart", methods=["DELETE"])
 def cleanCart():
-    #Emptys all saved items
-    cursor.execute("DELETE FROM saved_table")
-    connection.commit()
-    return "Saved items cleaned"
+    userID = request.args['userID']
+    response = {'result': 'null'}
 
+    try:
+        #Emptys all saved items
+        cursor.execute("DELETE FROM saved_table WHERE userID = '%s'".format(userID))
+        connection.commit()
+        response['result'] = 'done'
+    except Exception as err:
+        response['error'] = err
+
+    return response
+
+@savedItems.route("/savedItems/displayData", methods=["GET"])
 def displayData():
-    #Displays all data in the saved items table, used for debugging.
-    cursor.execute("SELECT * FROM saved_table")
-    for x in cursor:
-        print(x)
+    userID = request.args['userID']
+    response = {'result' : 'null'}
+
+    try:
+        #Displays all data in the saved items table, used for debugging.
+        cursor.execute("SELECT * FROM saved_table WHERE userID = '%s'".format(userID))
+        response['result'] = cursor
+    except Exception as err:
+        response['error'] = err
+    return response
