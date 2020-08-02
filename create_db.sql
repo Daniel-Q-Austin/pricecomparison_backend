@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS `priceaid`.`administrator`(
 DROP TABLE IF EXISTS `priceaid`.`saved_table`;
 CREATE TABLE IF NOT EXISTS `priceaid`.`saved_table` (
     `userID` INT NOT NULL,
-    `itemID` INT NOT NULL AUTO_INCREMENT ,
+    `itemID` INT NOT NULL AUTO_INCREMENT,
+    `name` NVARCHAR(255) NOT NULL,
     `url` NVARCHAR(255) NOT NULL,
 	`email` NVARCHAR(255) NOT NULL,
 	`price` DECIMAL(6,2) NOT NULL,
