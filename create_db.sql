@@ -1,38 +1,37 @@
-USE master;
-GO
+DROP DATABASE IF EXISTS `priceaid`;
+CREATE DATABASE IF NOT EXISTS `priceaid`;
 
-CREATE DATABASE PriceAid;
-GO
+Use `priceaid`;
 
-Use PriceAid;
-GO
-
-CREATE TABLE [dbo].[administrator](
-    [userID] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
-    [loginStatus] [binary] NOT NULL,
-	[email] [nvarchar](255) NOT NULL,
-    [password] [nvarchar](255) NOT NULL,
-	[name] [nvarchar](255) NOT NULL,
-	[phonenumber] [nvarchar](255) NOT NULL,
+DROP TABLE IF EXISTS `priceaid`.`administrator`;
+CREATE TABLE IF NOT EXISTS `priceaid`.`administrator`(
+    `userID` INT NOT NULL AUTO_INCREMENT,
+    `loginStatus` BINARY NOT NULL,
+	`email` NVARCHAR(255) NOT NULL,
+    `password` NVARCHAR(255) NOT NULL,
+	`name` NVARCHAR(255) NOT NULL,
+	`phonenumber` NVARCHAR(255) NOT NULL,
+    PRIMARY KEY(`userID`)
 );
-GO 
 
-CREATE TABLE [dbo].[saved_table](
-    [userID] [int],
-    [itemID] [int] NOT NULL IDENTITY(1,1) PRIMARY KEY,
-    [url] [nvarchar](255) NOT NULL,
-	[email] [nvarchar](255) NOT NULL,
-	[price] [nvarchar](255) NOT NULL,
-	[company_name] [nvarchar](255) NOT NULL,
-    CONSTRAINT [FK_tbladministrator_tblsaved_table_userID] FOREIGN KEY ([userID]) REFERENCES [dbo].[administrator] ([userID])
+DROP TABLE IF EXISTS `priceaid`.`saved_table`;
+CREATE TABLE IF NOT EXISTS `priceaid`.`saved_table` (
+    `userID` INT NOT NULL,
+    `itemID` INT NOT NULL AUTO_INCREMENT ,
+    `url` NVARCHAR(255) NOT NULL,
+	`email` NVARCHAR(255) NOT NULL,
+	`price` DECIMAL(6,2) NOT NULL,
+	`company_name` NVARCHAR(255) NOT NULL,
+    PRIMARY KEY(`itemID`),
+    CONSTRAINT `FK_tbladministrator_tblsaved_table_userID` FOREIGN KEY (`userID`) REFERENCES `priceaid`.`administrator` (`userID`)
 );
-GO
 
-CREATE TABLE [dbo].[history](
-    [userID] [int],
-    [itemCode] [int] NOT NULL IDENTITY(1,1) PRIMARY KEY,
-    [searchedDate] [datetime] NOT NULL,
-    [itemName] [nvarchar] (255) NOT NULL,
-    CONSTRAINT [FK_tbladministrator_tblhistory_userID] FOREIGN KEY ([userID]) REFERENCES [dbo].[administrator] ([userID])
+DROP TABLE IF EXISTS `priceaid`.`history`;
+CREATE TABLE IF NOT EXISTS `priceaid`.`history`(
+    `userID` INT NOT NULL,
+    `itemCode` INT NOT NULL AUTO_INCREMENT,
+    `searchedDate` DATETIME NOT NULL,
+    `itemName` NVARCHAR(255) NOT NULL,
+    PRIMARY KEY(`itemCode`),
+    CONSTRAINT `FK_tbladministrator_tblhistory_userID` FOREIGN KEY (`userID`) REFERENCES `priceaid`.`administrator` (`userID`)
 );
-GO
