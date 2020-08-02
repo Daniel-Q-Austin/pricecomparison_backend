@@ -1,8 +1,14 @@
 from flask import request, jsonify, Flask
-from bestbuyproducts import bestbuyproducer
+from bestbuyproducts import bestbuyproducts
+from savedItems import savedItems
+from Administrator import administrator
+from customers import customers
 
 app = Flask(__name__)
-app.register_blueprint(bestbuyproducer)
+app.register_blueprint(bestbuyproducts)
+app.register_blueprint(savedItems)
+app.register_blueprint(administrator)
+app.register_blueprint(customers)
 
 @app.route('/', methods=['GET'])
 def main():
