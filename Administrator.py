@@ -1,101 +1,176 @@
-class Administrator(object):
-    def isLoggedIn(self, conn, userID=None):
-        """
-        -------------------------------------------------------
-        Checks login status of a user
-        Use: loggedIn = Administrator.isLoggedIn(conn, userID)
-        -------------------------------------------------------
-        Parameters:
-            conn - a database connection (Connect)
-            userId - a user ID number (int)
-        Returns:
-            loggedIn - the login status of the user (boolean)
-        -------------------------------------------------------
-        """
-        loggedIn = None
-        if userID is not None:
-            sql = "SELECT loginStatus FROM administrator WHERE userID = %s AND itemCode = %s ORDER BY searchedDate DESC"
-            conn.cursor.execute(sql, (userID,))
-            loggedIn = conn.cursor.fetchall()[0] == 1
-        return loggedIn
-    
-    
-    def updateSettings(self, conn, userID=None, newEmail=None, newPassword=None, newName=None):
-        """
-        -------------------------------------------------------
-        Updates a user's settings
-        Use: Administrator.updateSettings(conn, userID, newName, newEmail, newPassword)
-        -------------------------------------------------------
-        Parameters:
-            conn - a database connection (Connect)
-            userId - a user ID number (int)
-            newName - the name that the user's name should be changed to (string)
-            newEmail - the email that the user's email should be changed to (string)
-            newPassword - the password that the user's password should be changed to (string)    
-        -------------------------------------------------------
-        """
-        if userID is not None:
-            if newName is not None:
-                if newEmail is not None:
-                    if newPassword is not None:
-                        sql = "UPDATE administrator SET name = %s, email = %s, password = %s WHERE userID = %s"
-                        conn.cursor.execute(sql, (newName, newEmail, newPassword, userID,))
-                    else:
-                        sql = "UPDATE administrator SET name = %s, email = %s WHERE userID = %s"
-                        conn.cursor.execute(sql, (newName, newEmail, userID,))
-                else:
-                    if newPassword is not None:
-                        sql = "UPDATE administrator SET name = %s, password = %s WHERE userID = %s"
-                        conn.cursor.execute(sql, (newName, newPassword, userID,))
-                    else:
-                        sql = "UPDATE administrator SET name = %s WHERE userID = %s"
-                        conn.cursor.execute(sql, (newName, userID,))
-            else:
-                if newEmail is not None:
-                    if newPassword is not None:
-                        sql = "UPDATE administrator SET email = %s, password = %s WHERE userID = %s"
-                        conn.cursor.execute(sql, (newEmail, newPassword, userID,))
-                    else:
-                        sql = "UPDATE administrator SET email = %s WHERE userID = %s"
-                        conn.cursor.execute(sql, (newEmail, userID,))
-                else:
-                    if newPassword is not None:
-                        sql = "UPDATE administrator SET password = %s WHERE userID = %s"
-                        conn.cursor.execute(sql, (newPassword, userID,))
-    
-    
-    def removeItemFromDB(self, conn, userID=None):
-        """
-        -------------------------------------------------------
-        Removes a user from the database if they delete their account 
-        Use: Administrator.removeItemFromDB(conn, userID)
-        -------------------------------------------------------
-        Parameters:
-            conn - a database connection (Connect)
-            userId - a user ID number (int)
-        -------------------------------------------------------
-        """
-        if userID is not None:
-            sql = "DELETE FROM administrator WHERE userID = %s"
-            conn.cursor.execute(sql, (userID,))
+from Connect import Connect
+from flask import request, jsonify, Blueprint
 
+conn = Connect('database.txt')
+administrator = Blueprint('administrator',__name__)
 
-    def addItemToDB(self, conn, email, password, name=None):
-        """
-        -------------------------------------------------------
-        Adds a user to the database when they register their account
-        Use: Administrator.addItemToDB(conn, name, email, password)
-        -------------------------------------------------------
-        Parameters:
-            conn - a database connection (Connect)
-            name - the user's name (string) 
-            email - the user's email (string)
-            password - the user's password (string)
-        -------------------------------------------------------
-        """
-        if name is not None:
-            sql = "INSERT INTO administrator (name, email, password) VALUES (%s, %s, %s)"
-            conn.cursor.execute(sql, (name, email, password,))
-        else:
-            sql = "INSERT INTO administrator (email, password) VALUES (%s, %s)"
-            conn.cursor.execute(sql, (email, password,))
+@administrator.route('/administration/isLoggedIn', methods=['GET'])
+def isLoggedIn():
+    """
+    -------------------------------------------------------
+    Checks login status of a user
+    -------------------------------------------------------
+    Parameters:
+        userId - a user ID number (int)
+    Returns:
+        userId - a user ID number (int)
+        loggedIn - the login status of the user (boolean)
+    -------------------------------------------------------
+    """
+    loggedIn = False
+    userID = request.args['userID']
+
+    if userID != 'null':
+        sql = "SELECT loginStatus FROM administrator WHERE userID = %s"
+        conn.cursor.execute(sql, (userID,))
+        loggedIn = conn.cursor.fetchone()[0] == 1
+    response = {'userID': userID, 'loggedIn': loggedIn}
+    return response
+
+@administrator.route('/administration/logIn', methods=['GET'])
+def logIn():
+    """
+    -------------------------------------------------------
+    LogIn a User
+    -------------------------------------------------------
+    Parameters:
+        email - a user Email (String)
+        password - a user Password (String)
+    Returns:
+        userId - a user ID number (int)
+        loggedIn - the login status of the user (boolean)
+    -------------------------------------------------------
+    """
+    email = request.args['email']
+    password = request.args['password']
+    
+    check_if_user_exist_sql = "SELECT userID FROM administrator WHERE email = %s AND password = %s"
+
+    conn.cursor.execute(check_if_user_exist_sql, (email, password,))
+    userID = conn.cursor.fetchone()
+    if userID is not None:
+        userID = userID[0]
+
+    response = {'userID': userID == 'null' if userID == None else userID, 'loggedIn': False}
+    if userID is not None:
+        update_user_sql = "UPDATE administrator SET loginStatus = 1 WHERE userID = %s"
+        conn.cursor.execute(update_user_sql, (userID,))
+        response['loggedIn'] = True
+    return response
+
+@administrator.route('/administration/logOut', methods=['GET'])
+def logOut():
+    """
+    -------------------------------------------------------
+    LogOut a User
+    -------------------------------------------------------
+    Parameters:
+        userId - a user ID number (int)
+    Returns:
+        userId - a user ID number (int)
+        loggedIn - the login status of the user (boolean)
+    -------------------------------------------------------
+    """
+    userID = request.args['userID']
+
+    response = {'userID' : userID, 'loggedIn' : False}
+    if userID != 'null':
+        sql = "UPDATE administrator SET loginStatus = 0 WHERE userID = %s"
+        conn.cursor.execute(sql, (userID,))
+        response['loggedIn'] = conn.cursor.fetchall()[0] == 1
+    return response
+
+@administrator.route('/administration/updateSettings', methods=['GET'])
+def updateSettings():
+    """
+    -------------------------------------------------------
+    Updates a user's settings
+    -------------------------------------------------------
+    Parameters:
+        userId - a user ID number (int)
+        newName - the name that the user's name should be changed to (string)
+        newEmail - the email that the user's email should be changed to (string)
+        newPassword - the password that the user's password should be changed to (string)   
+        newPhoneNumber - the password that the user's phonenumber should be changed to (string) 
+    
+    Returns:
+        result - a string 'done' 
+    -------------------------------------------------------
+    """
+    userID = request.args['userID']
+    newName = request.args['name'] 
+    newEmail = request.args['email']
+    newPassword = request.args['password'] 
+    newPhoneNumber = request.args['phonenumber']
+
+    sql = "UPDATE administrator SET name = %s, email = %s, password = %s, phonenumber = %s WHERE userID = %s"
+    conn.cursor.execute(sql, (newName, newEmail, newPassword, userID, newPhoneNumber,))
+    response = {'result' : 'done'}
+    return response
+
+@administrator.route('/administration/removeItemFromDB', methods=['GET'])
+def removeItemFromDB():
+    """
+    -------------------------------------------------------
+    Removes a user from the database if they delete their account
+    -------------------------------------------------------
+    Parameters:
+        userId - a user ID number (int)
+        
+    Returns:
+        result - a string 'done' 
+    -------------------------------------------------------
+    """
+    userID = request.args['userID']
+
+    sql = "DELETE FROM administrator WHERE userID = %s"
+    conn.cursor.execute(sql, (userID,))
+    response = {'result' : 'done'}
+    return response
+
+@administrator.route('/administration/addItemToDB', methods=['GET'])
+def addItemToDB():
+    """
+    -------------------------------------------------------
+    Adds a user to the database when they register their account
+    -------------------------------------------------------
+    Parameters:
+        name - the user's name (string) 
+        email - the user's email (string)
+        password - the user's password (string)
+    
+    Returns:
+        result - a string 'done' 
+    -------------------------------------------------------
+    """
+    email = request.args['email']
+    password = request.args['password']
+    phonenumber = request.args['phonenumber']
+    name = request.args['name']
+
+    sql = "INSERT INTO administrator (loginStatus, email, password, name, phonenumber) VALUES (%d, %s, %s, %s, %s)"
+    conn.cursor.execute(sql, (0 ,email, password, name, phonenumber,))
+    response = {'result' : 'done'}
+    return response
+
+@administrator.route('/administration/getUserDetail', methods=['GET'])
+def getUserDetail():
+    """
+    -------------------------------------------------------
+    Get User Detail
+    -------------------------------------------------------
+    Parameters:
+        userID - a user ID number (int)
+    Returns:
+        userDetail - a json object containing user details (tuple)
+    -------------------------------------------------------
+    """
+    userID = request.args['userID']
+    userDetail = 'null'
+
+    if userID != 'null':
+        sql = "SELECT * FROM administrator WHERE userID = %s"
+        conn.cursor.execute(sql, (userID,))
+        userDetail = conn.cursor.fetchone()
+    response = {'userDetail': userDetail}
+    return response
