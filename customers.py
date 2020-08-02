@@ -1,49 +1,58 @@
+from flask import request, jsonify, Blueprint
+from Connect import Connect
 
-class Customer (object):
-    # - is priv, + is public
-    def __init__(self, name, email):
-        self.__name = name  # private attribute 
-        self.__email = email # private attribute
+conn = Connect('database.txt')
+customers = Blueprint('customers',__name__)
 
-    def history(self, conn, itemCode=None, userID=None):
-        """
-        -------------------------------------------------------
-        Checks history status of a user
-        Use: history = Customer.history(conn, itemCode, userID)
-        -------------------------------------------------------
-        Parameters:
-            conn - a database connection (Connect)
-            itemCode - item's code (int)
-            userId - a user ID number (int)
-        Returns:
-            history - the history status of the user (boolean)
-        -------------------------------------------------------
-        """
-        history = None
-        if userID is not None and itemCode is not None:
-            sql = "SELECT itemName FROM history WHERE userID = %s AND itemCode = %s ORDER BY searchedDate DESC"
-            conn.cursor.execute(sql, (userID, itemCode,))
-            history = conn.cursor.fetchall()
-        return history
+@customers.route('/customers/history', methods=['GET'])
+def history():
+    """
+    -------------------------------------------------------
+    Checks history status of a user
+    Use: history = Customer.history(conn, itemCode, userID)
+    -------------------------------------------------------
+    Parameters:
+        userId - a user ID number (int)
+    Returns:
+        history - the search history of the user (tuple)
+    -------------------------------------------------------
+    """
+    itemCode=request.args['itemCode']
+    userID=request.args['userID']
+    response = {'history' : 'null'}
     
-    def updateHistory(self, conn, itemCode=None, userID=None):
-        """
-        -------------------------------------------------------
-        Updates history of a user
-        Use: updatedHistory = Customer.updateHistory(conn, itemCode, userID)
-        -------------------------------------------------------
-        Parameters:
-            conn - a database connection (Connect)
-            itemCode - item's code (int)
-            userId - a user ID number (int)
-        Returns:
-            updatedHistory - user's new history (boolean)
-        -------------------------------------------------------
-        """
-        updatedHistory = None
-        if userID is not None and itemCode is not None:
-            sql = "INSERT INTO history (userID, itemCode, itemName) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE itemName = %s"
-            conn.cursor.execute(sql, (userID, itemCode, itemName, itemName,))
-            updatedHistory = conn.cursor.fetchall()
-        return updatedHistory
+    try:
+        if userID !='null':
+            sql = "SELECT * FROM history WHERE userID = %s ORDER BY searchedDate DESC"
+            conn.cursor.execute(sql, (userID,))
+            response['history'] = conn.cursor.fetchall()
+    except Exception as err:
+        request['error'] = err
+    
+    return response
+
+@customers.route('/customers/addHistory', methods=['GET'])
+def addHistory():
+    """
+    -------------------------------------------------------
+    add to user history
+    -------------------------------------------------------
+    Parameters:
+        itemName - item's name (int)
+        userId - a user ID number (int)
+        searchDate - search date (datetime)
+    Returns:
+        updatedHistory - user's new history (boolean)
+    -------------------------------------------------------
+    """
+    userID = request.args['userID'] 
+    searchDate = request.args['searchDate']
+    itemName = request.args['itemName']
+
+    response = {'update' : False}
+    if userID is not None and itemCode is not None:
+        sql = "INSERT INTO history (userID, searchedDate, itemName) VALUES (%s, %s, %s)"
+        conn.cursor.execute(sql, (userID, searchDate, itemName, ))
+        response['update'] = True
+    return response
 

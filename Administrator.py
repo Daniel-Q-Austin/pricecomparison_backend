@@ -20,10 +20,14 @@ def isLoggedIn():
     loggedIn = False
     userID = request.args['userID']
 
-    if userID != 'null':
-        sql = "SELECT loginStatus FROM administrator WHERE userID = %s"
-        conn.cursor.execute(sql, (userID,))
-        loggedIn = conn.cursor.fetchone()[0] == 1
+    try:    
+        if userID != 'null':
+            sql = "SELECT loginStatus FROM administrator WHERE userID = %s"
+            conn.cursor.execute(sql, (userID,))
+            loggedIn = conn.cursor.fetchone()[0] == 1
+    except Exception as err:
+        response['error'] = err
+
     response = {'userID': userID, 'loggedIn': loggedIn}
     return response
 
@@ -43,19 +47,24 @@ def logIn():
     """
     email = request.args['email']
     password = request.args['password']
-    
-    check_if_user_exist_sql = "SELECT userID FROM administrator WHERE email = %s AND password = %s"
+    userID = 'null'
 
-    conn.cursor.execute(check_if_user_exist_sql, (email, password,))
-    userID = conn.cursor.fetchone()
-    if userID is not None:
-        userID = userID[0]
+    try:
+        check_if_user_exist_sql = "SELECT userID FROM administrator WHERE email = %s AND password = %s"
+        
+        conn.cursor.execute(check_if_user_exist_sql, (email, password,))
+        userID = conn.cursor.fetchone()
+        
+        if userID is not None:
+            userID = userID[0]
 
-    response = {'userID': userID == 'null' if userID == None else userID, 'loggedIn': False}
-    if userID is not None:
-        update_user_sql = "UPDATE administrator SET loginStatus = 1 WHERE userID = %s"
-        conn.cursor.execute(update_user_sql, (userID,))
-        response['loggedIn'] = True
+        response = {'userID': userID == 'null' if userID == None else userID, 'loggedIn': False}
+        if userID is not None:
+            update_user_sql = "UPDATE administrator SET loginStatus = 1 WHERE userID = %s"
+            conn.cursor.execute(update_user_sql, (userID,))
+            response['loggedIn'] = True
+    except Exception as err:
+        response['error'] = err
     return response
 
 @administrator.route('/administration/logOut', methods=['GET'])
@@ -74,10 +83,15 @@ def logOut():
     userID = request.args['userID']
 
     response = {'userID' : userID, 'loggedIn' : False}
-    if userID != 'null':
-        sql = "UPDATE administrator SET loginStatus = 0 WHERE userID = %s"
-        conn.cursor.execute(sql, (userID,))
-        response['loggedIn'] = conn.cursor.fetchall()[0] == 1
+    
+    try:
+        if userID != 'null':
+            sql = "UPDATE administrator SET loginStatus = 0 WHERE userID = %s"
+            conn.cursor.execute(sql, (userID,))
+            response['loggedIn'] = conn.cursor.fetchall()[0] == 1    
+    except Exception as err:
+        response['error'] = err
+    
     return response
 
 @administrator.route('/administration/updateSettings', methods=['GET'])
@@ -103,9 +117,14 @@ def updateSettings():
     newPassword = request.args['password'] 
     newPhoneNumber = request.args['phonenumber']
 
-    sql = "UPDATE administrator SET name = %s, email = %s, password = %s, phonenumber = %s WHERE userID = %s"
-    conn.cursor.execute(sql, (newName, newEmail, newPassword, userID, newPhoneNumber,))
-    response = {'result' : 'done'}
+    response = {'result' : 'null'}
+    try:
+        sql = "UPDATE administrator SET name = %s, email = %s, password = %s, phonenumber = %s WHERE userID = %s"
+        conn.cursor.execute(sql, (newName, newEmail, newPassword, userID, newPhoneNumber,))
+        response['result'] = 'done'
+    except Exception as err:
+        response['error'] = err
+
     return response
 
 @administrator.route('/administration/removeItemFromDB', methods=['GET'])
@@ -123,9 +142,14 @@ def removeItemFromDB():
     """
     userID = request.args['userID']
 
-    sql = "DELETE FROM administrator WHERE userID = %s"
-    conn.cursor.execute(sql, (userID,))
-    response = {'result' : 'done'}
+    response = {'result' : 'null'}
+    try:
+        sql = "DELETE FROM administrator WHERE userID = %s"
+        conn.cursor.execute(sql, (userID,))
+        response['result'] = 'done'
+    except Exception as err:
+        response['error'] = err
+        
     return response
 
 @administrator.route('/administration/addItemToDB', methods=['GET'])
@@ -148,9 +172,14 @@ def addItemToDB():
     phonenumber = request.args['phonenumber']
     name = request.args['name']
 
-    sql = "INSERT INTO administrator (loginStatus, email, password, name, phonenumber) VALUES (%d, %s, %s, %s, %s)"
-    conn.cursor.execute(sql, (0 ,email, password, name, phonenumber,))
-    response = {'result' : 'done'}
+    response = {'result' : 'null'}
+    try:
+        sql = "INSERT INTO administrator (loginStatus, email, password, name, phonenumber) VALUES (%d, %s, %s, %s, %s)"
+        conn.cursor.execute(sql, (0 ,email, password, name, phonenumber,))
+        response['result'] = 'done'
+    except Exception as err:
+        response['error'] = err
+
     return response
 
 @administrator.route('/administration/getUserDetail', methods=['GET'])
@@ -168,9 +197,13 @@ def getUserDetail():
     userID = request.args['userID']
     userDetail = 'null'
 
-    if userID != 'null':
-        sql = "SELECT * FROM administrator WHERE userID = %s"
-        conn.cursor.execute(sql, (userID,))
-        userDetail = conn.cursor.fetchone()
+    try:
+        if userID != 'null':
+            sql = "SELECT * FROM administrator WHERE userID = %s"
+            conn.cursor.execute(sql, (userID,))
+            userDetail = conn.cursor.fetchone()
+    except Exception as err:
+        response['error'] = err
+
     response = {'userDetail': userDetail}
     return response
