@@ -20,7 +20,7 @@ def api_all():
 		for item in products:
 			del item["sku"]
 		products = sorted(products, key = lambda i: i['salePrice']) 
-		response['result'] = jsonify(products)
+		response['result'] = products
 	except Exception as err:
 		response['error'] = str(err)
 		error = True
