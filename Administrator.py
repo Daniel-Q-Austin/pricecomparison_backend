@@ -5,7 +5,7 @@ conn = Connect('database.txt')
 administrator = Blueprint('administrator',__name__)
 
 def sendResponse(response,has_error):
-    r = make_response((response, 200 if not has_error else 404))
+    r = make_response((response, 200 if not has_error else 500))
     return r
 
 @administrator.route('/administration/isLoggedIn', methods=['GET'])
@@ -133,7 +133,7 @@ def updateSettings():
     response = {'result' : 'null'}
     try:
         sql = "UPDATE administrator SET name = %s, email = %s, password = %s, phonenumber = %s WHERE userID = %s"
-        conn.cursor.execute(sql, (newName, newEmail, newPassword, userID, newPhoneNumber,))
+        conn.cursor.execute(sql, (newName, newEmail, newPassword, newPhoneNumber, userID,))
         response['result'] = 'done'
     except Exception as err:
         response['error'] = str(err)
