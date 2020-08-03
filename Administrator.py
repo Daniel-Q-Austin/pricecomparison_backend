@@ -1,9 +1,12 @@
 from Connect import Connect
-from flask import request, jsonify, Blueprint
-from main import sendResponse
+from flask import request, jsonify, Blueprint, make_response
 
 conn = Connect('database.txt')
 administrator = Blueprint('administrator',__name__)
+
+def sendResponse(response,has_error):
+    r = make_response((response, 200 if not has_error else 404))
+    return r
 
 @administrator.route('/administration/isLoggedIn', methods=['GET'])
 def isLoggedIn():
@@ -176,20 +179,20 @@ def addItemToDB():
         result - a string 'done' 
     -------------------------------------------------------
     """
-    # email = request.args['email']
-    # password = request.args['password']
-    # phonenumber = request.args['phonenumber']
-    # name = request.args['name']
+    email = request.args['email']
+    password = request.args['password']
+    phonenumber = request.args['phonenumber']
+    name = request.args['name']
     error = False
-    print(request.args)
     response = {'result' : 'null'}
-    # try:
-    #     sql = "INSERT INTO administrator (loginStatus, email, password, name, phonenumber) VALUES (%d, %s, %s, %s, %s)"
-    #     conn.cursor.execute(sql, (0 ,email, password, name, phonenumber,))
-    #     response['result'] = 'done'
-    # except Exception as err:
-    #     response['error'] = err
-        # error = True
+    
+    try:
+        sql = "INSERT INTO administrator (loginStatus, email, password, name, phonenumber) VALUES (%d, %s, %s, %s, %s)"
+        conn.cursor.execute(sql, (0 ,email, password, name, phonenumber,))
+        response['result'] = 'done'
+    except Exception as err:
+        response['error'] = err
+        error = True
 
     return sendResponse(response,error)
 

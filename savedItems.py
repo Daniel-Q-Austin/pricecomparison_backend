@@ -3,7 +3,7 @@
 
 from flask import request, jsonify, Blueprint
 from Connect import Connect
-from main import sendResponse
+from Administrator import sendResponse
 
 conn = Connect('database.txt')
 cursor = conn.cursor

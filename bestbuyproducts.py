@@ -1,6 +1,6 @@
 from flask import request, jsonify, Blueprint
 import urllib.request, json 
-from main import sendResponse
+from Administrator import sendResponse
 
 bestbuyproducts = Blueprint('bestbuyproducts',__name__)
 
