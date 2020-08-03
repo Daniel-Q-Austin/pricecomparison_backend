@@ -56,6 +56,8 @@ def logIn():
     userID = 'null'
     error = False
 
+    response = {'userID': 'null', 'loggedIn': False}
+
     try:
         check_if_user_exist_sql = "SELECT userID FROM administrator WHERE email = %s AND password = %s"
         
@@ -65,7 +67,7 @@ def logIn():
         if userID is not None:
             userID = userID[0]
 
-        response = {'userID': userID == 'null' if userID == None else userID, 'loggedIn': False}
+        response['userID'] = 'null' if userID == None else userID
         if userID is not None:
             update_user_sql = "UPDATE administrator SET loginStatus = 1 WHERE userID = %s"
             conn.cursor.execute(update_user_sql, (userID,))
