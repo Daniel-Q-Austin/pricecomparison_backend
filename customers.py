@@ -59,7 +59,7 @@ def addHistory():
             conn.cursor.execute(sql, (userID, searchDate, itemName, ))
             response['update'] = 'done'
         except Exception as err:
-            response['error'] = err
+            response['error'] = str(err)
             error = True
     
     return sendResponse(response,error)

@@ -21,13 +21,13 @@ def addNewItem():
 
     response = {'result' : 'null'}
     #Adds a saved item
-    sql = 'INSERT INTO saved_table (userID, name, url, email, price, company_name) VALUES (%d, %s, %s, %s, %.2f, %s)'
+    sql = 'INSERT INTO saved_table (userID, name, url, email, price, company_name) VALUES (%s, %s, %s, %s, %s, %s)'
     val = (userID, name, url, email, price, company_name)
     try:
         cursor.execute(sql, val)
         response['result'] = 'done'
     except Exception as err:
-        response['error'] = err
+        response['error'] = str(err)
         error = True
 
     connection.commit()
@@ -45,7 +45,7 @@ def removeItem():
         connection.commit()
         response['result'] = 'done'
     except Exception as err:
-        response['error'] = err
+        response['error'] = str(err)
         error = True
     
     return sendResponse(response,error)
@@ -58,11 +58,11 @@ def cleanCart():
 
     try:
         #Emptys all saved items
-        cursor.execute("DELETE FROM saved_table WHERE userID = '%s'".format(userID))
+        cursor.execute("DELETE FROM saved_table WHERE userID = '{}'".format(userID))
         connection.commit()
         response['result'] = 'done'
     except Exception as err:
-        response['error'] = err
+        response['error'] = str(err)
         error = True
 
     return sendResponse(response,error)
@@ -75,10 +75,10 @@ def displayData():
 
     try:
         #Displays all data in the saved items table, used for debugging.
-        cursor.execute("SELECT * FROM saved_table WHERE userID = '%s'".format(userID))
+        cursor.execute("SELECT * FROM saved_table WHERE userID = '{}'".format(userID))
         response['result'] = cursor
     except Exception as err:
-        response['error'] = err
+        response['error'] = str(err)
         error = True
 
     return sendResponse(response,error)

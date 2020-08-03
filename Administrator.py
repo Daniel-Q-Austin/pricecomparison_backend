@@ -31,7 +31,7 @@ def isLoggedIn():
             conn.cursor.execute(sql, (userID,))
             loggedIn = conn.cursor.fetchone()[0] == 1
     except Exception as err:
-        response['error'] = err
+        response['error'] = str(err)
         error = True
 
     response = {'userID': userID, 'loggedIn': loggedIn}
@@ -71,7 +71,7 @@ def logIn():
             conn.cursor.execute(update_user_sql, (userID,))
             response['loggedIn'] = True
     except Exception as err:
-        response['error'] = err
+        response['error'] = str(err)
         error = True
     
     return sendResponse(response,error)
@@ -99,7 +99,7 @@ def logOut():
             conn.cursor.execute(sql, (userID,))
             response['loggedIn'] = conn.cursor.fetchall()[0] == 1    
     except Exception as err:
-        response['error'] = err
+        response['error'] = str(err)
         error = True
     
     return sendResponse(response, error)
@@ -134,7 +134,7 @@ def updateSettings():
         conn.cursor.execute(sql, (newName, newEmail, newPassword, userID, newPhoneNumber,))
         response['result'] = 'done'
     except Exception as err:
-        response['error'] = err
+        response['error'] = str(err)
         error = True
 
     return sendResponse(response, error)
@@ -160,7 +160,7 @@ def removeItemFromDB():
         conn.cursor.execute(sql, (userID,))
         response['result'] = 'done'
     except Exception as err:
-        response['error'] = err
+        response['error'] = str(err)
         
     return sendResponse(response,error)
 
@@ -187,11 +187,11 @@ def addItemToDB():
     response = {'result' : 'null'}
     
     try:
-        sql = "INSERT INTO administrator (loginStatus, email, password, name, phonenumber) VALUES (%d, %s, %s, %s, %s)"
+        sql = "INSERT INTO administrator (loginStatus, email, password, name, phonenumber) VALUES (%s, %s, %s, %s, %s)"
         conn.cursor.execute(sql, (0 ,email, password, name, phonenumber,))
         response['result'] = 'done'
     except Exception as err:
-        response['error'] = err
+        response['error'] = str(err)
         error = True
 
     return sendResponse(response,error)
@@ -218,7 +218,7 @@ def getUserDetail():
             conn.cursor.execute(sql, (userID,))
             userDetail = conn.cursor.fetchone()
     except Exception as err:
-        response['error'] = err
+        response['error'] = str(err)
         error = True
 
     response = {'userDetail': userDetail}

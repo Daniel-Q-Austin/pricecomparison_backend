@@ -13,7 +13,7 @@ def api_all():
 		if 'search' in request.args:
 			search = request.args['search']
 		else:
-			return "Error: No search field provided. Please search for products."
+			response['error_2'] = "Error: No search field provided. Please search for products."
 		link = "https://api.bestbuy.com/v1/products(search={})?format=json&show=sku,name,salePrice&apiKey=N0ReEPP28MPw3Gd2xSIAQ5dM".format(search)
 		data = json.loads(urllib.request.urlopen(link).read().decode())
 		products = data['products']
@@ -22,7 +22,7 @@ def api_all():
 		products = sorted(products, key = lambda i: i['salePrice']) 
 		response['result'] = jsonify(products)
 	except Exception as err:
-		response['error'] = err
+		response['error'] = str(err)
 		error = True
 	
 	return sendResponse(response, error)
