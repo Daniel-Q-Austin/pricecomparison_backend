@@ -155,6 +155,7 @@ def removeItemFromDB():
     -------------------------------------------------------
     """
     userID = request.args['userID']
+    error = False
 
     response = {'result' : 'null'}
     try:
@@ -163,7 +164,7 @@ def removeItemFromDB():
         response['result'] = 'done'
     except Exception as err:
         response['error'] = str(err)
-        
+        error = True
     return sendResponse(response,error)
 
 @administrator.route('/administration/addItemToDB', methods=['GET'])
