@@ -3,6 +3,7 @@
 
 from flask import request, jsonify, Blueprint
 from Connect import Connect
+from main import sendResponse
 
 conn = Connect('database.txt')
 cursor = conn.cursor
@@ -16,7 +17,8 @@ def addNewItem():
     userID = request.args['userID']
     url = request.args['url']
     price = request.args['price']
-    
+    error = False
+
     response = {'result' : 'null'}
     #Adds a saved item
     sql = 'INSERT INTO saved_table (userID, name, url, email, price, company_name) VALUES (%d, %s, %s, %s, %.2f, %s)'
@@ -26,13 +28,16 @@ def addNewItem():
         response['result'] = 'done'
     except Exception as err:
         response['error'] = err
+        error = True
+
     connection.commit()
-    return response
+    return sendResponse(response,error)
 
 @savedItems.route("/savedItems/removeItem", methods=["DELETE"])
 def removeItem():
     itemCode = request.args['itemCode']
     response = {'result' : 'null'}
+    error = False
 
     try:
         cursor.execute("DELETE FROM saved_table WHERE itemCode = '{}'".format(itemCode))
@@ -41,13 +46,15 @@ def removeItem():
         response['result'] = 'done'
     except Exception as err:
         response['error'] = err
+        error = True
     
-    return response
+    return sendResponse(response,error)
 
 @savedItems.route("/savedItems/cleanCart", methods=["DELETE"])
 def cleanCart():
     userID = request.args['userID']
     response = {'result': 'null'}
+    error = False
 
     try:
         #Emptys all saved items
@@ -56,13 +63,15 @@ def cleanCart():
         response['result'] = 'done'
     except Exception as err:
         response['error'] = err
+        error = True
 
-    return response
+    return sendResponse(response,error)
 
 @savedItems.route("/savedItems/displayData", methods=["GET"])
 def displayData():
     userID = request.args['userID']
     response = {'result' : 'null'}
+    error = False
 
     try:
         #Displays all data in the saved items table, used for debugging.
@@ -70,4 +79,6 @@ def displayData():
         response['result'] = cursor
     except Exception as err:
         response['error'] = err
-    return response
+        error = True
+
+    return sendResponse(response,error)

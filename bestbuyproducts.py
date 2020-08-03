@@ -1,11 +1,13 @@
 from flask import request, jsonify, Blueprint
 import urllib.request, json 
+from main import sendResponse
 
 bestbuyproducts = Blueprint('bestbuyproducts',__name__)
 
 @bestbuyproducts.route('/bestbuyproducts/products', methods=['GET'])
 def api_all():
-	
+	error = False
+
 	response = {'result': 'null'}
 	try:
 		if 'search' in request.args:
@@ -21,5 +23,6 @@ def api_all():
 		response['result'] = jsonify(products)
 	except Exception as err:
 		response['error'] = err
+		error = True
 	
-	return response
+	return sendResponse(response, error)

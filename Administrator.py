@@ -1,5 +1,6 @@
 from Connect import Connect
 from flask import request, jsonify, Blueprint
+from main import sendResponse
 
 conn = Connect('database.txt')
 administrator = Blueprint('administrator',__name__)
@@ -17,6 +18,7 @@ def isLoggedIn():
         loggedIn - the login status of the user (boolean)
     -------------------------------------------------------
     """
+    error = False
     loggedIn = False
     userID = request.args['userID']
 
@@ -27,9 +29,10 @@ def isLoggedIn():
             loggedIn = conn.cursor.fetchone()[0] == 1
     except Exception as err:
         response['error'] = err
+        error = True
 
     response = {'userID': userID, 'loggedIn': loggedIn}
-    return response
+    return sendResponse(response, error)
 
 @administrator.route('/administration/logIn', methods=['GET'])
 def logIn():
@@ -48,6 +51,7 @@ def logIn():
     email = request.args['email']
     password = request.args['password']
     userID = 'null'
+    error = False
 
     try:
         check_if_user_exist_sql = "SELECT userID FROM administrator WHERE email = %s AND password = %s"
@@ -65,7 +69,9 @@ def logIn():
             response['loggedIn'] = True
     except Exception as err:
         response['error'] = err
-    return response
+        error = True
+    
+    return sendResponse(response,error)
 
 @administrator.route('/administration/logOut', methods=['GET'])
 def logOut():
@@ -81,7 +87,7 @@ def logOut():
     -------------------------------------------------------
     """
     userID = request.args['userID']
-
+    error = False
     response = {'userID' : userID, 'loggedIn' : False}
     
     try:
@@ -91,8 +97,9 @@ def logOut():
             response['loggedIn'] = conn.cursor.fetchall()[0] == 1    
     except Exception as err:
         response['error'] = err
+        error = True
     
-    return response
+    return sendResponse(response, error)
 
 @administrator.route('/administration/updateSettings', methods=['GET'])
 def updateSettings():
@@ -117,6 +124,7 @@ def updateSettings():
     newPassword = request.args['password'] 
     newPhoneNumber = request.args['phonenumber']
 
+    error = False
     response = {'result' : 'null'}
     try:
         sql = "UPDATE administrator SET name = %s, email = %s, password = %s, phonenumber = %s WHERE userID = %s"
@@ -124,8 +132,9 @@ def updateSettings():
         response['result'] = 'done'
     except Exception as err:
         response['error'] = err
+        error = True
 
-    return response
+    return sendResponse(response, error)
 
 @administrator.route('/administration/removeItemFromDB', methods=['GET'])
 def removeItemFromDB():
@@ -150,7 +159,7 @@ def removeItemFromDB():
     except Exception as err:
         response['error'] = err
         
-    return response
+    return sendResponse(response,error)
 
 @administrator.route('/administration/addItemToDB', methods=['GET'])
 def addItemToDB():
@@ -167,20 +176,22 @@ def addItemToDB():
         result - a string 'done' 
     -------------------------------------------------------
     """
-    email = request.args['email']
-    password = request.args['password']
-    phonenumber = request.args['phonenumber']
-    name = request.args['name']
-
+    # email = request.args['email']
+    # password = request.args['password']
+    # phonenumber = request.args['phonenumber']
+    # name = request.args['name']
+    error = False
+    print(request.args)
     response = {'result' : 'null'}
-    try:
-        sql = "INSERT INTO administrator (loginStatus, email, password, name, phonenumber) VALUES (%d, %s, %s, %s, %s)"
-        conn.cursor.execute(sql, (0 ,email, password, name, phonenumber,))
-        response['result'] = 'done'
-    except Exception as err:
-        response['error'] = err
+    # try:
+    #     sql = "INSERT INTO administrator (loginStatus, email, password, name, phonenumber) VALUES (%d, %s, %s, %s, %s)"
+    #     conn.cursor.execute(sql, (0 ,email, password, name, phonenumber,))
+    #     response['result'] = 'done'
+    # except Exception as err:
+    #     response['error'] = err
+        # error = True
 
-    return response
+    return sendResponse(response,error)
 
 @administrator.route('/administration/getUserDetail', methods=['GET'])
 def getUserDetail():
@@ -196,6 +207,7 @@ def getUserDetail():
     """
     userID = request.args['userID']
     userDetail = 'null'
+    error = False
 
     try:
         if userID != 'null':
@@ -204,6 +216,7 @@ def getUserDetail():
             userDetail = conn.cursor.fetchone()
     except Exception as err:
         response['error'] = err
+        error = True
 
     response = {'userDetail': userDetail}
-    return response
+    return sendResponse(response,error)

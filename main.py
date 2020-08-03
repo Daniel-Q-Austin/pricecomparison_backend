@@ -1,4 +1,4 @@
-from flask import request, jsonify, Flask
+from flask import request, jsonify, Flask, Response
 from bestbuyproducts import bestbuyproducts
 from savedItems import savedItems
 from Administrator import administrator
@@ -18,5 +18,10 @@ def main():
 def endPointNotFound(error):
     return "Endpoint not found"
 
+def sendResponse(response,has_error):
+    r = Response(response = response, status = 200 if not has_error else 404, mimetype="=application/json")
+    d.headers["Content-Type"] = "application/json; charset=utf-8"
+    return r
+    
 if __name__ == "__main__":
     app.run()

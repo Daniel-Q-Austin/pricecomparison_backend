@@ -1,5 +1,6 @@
 from flask import request, jsonify, Blueprint
 from Connect import Connect
+from main import sendResponse
 
 conn = Connect('database.txt')
 customers = Blueprint('customers',__name__)
@@ -17,10 +18,10 @@ def history():
         history - the search history of the user (tuple)
     -------------------------------------------------------
     """
-    itemCode=request.args['itemCode']
     userID=request.args['userID']
     response = {'history' : 'null'}
-    
+    error = False
+
     try:
         if userID !='null':
             sql = "SELECT * FROM history WHERE userID = %s ORDER BY searchedDate DESC"
@@ -28,8 +29,9 @@ def history():
             response['history'] = conn.cursor.fetchall()
     except Exception as err:
         request['error'] = err
+        error = True
     
-    return response
+    return sendResponse(response,error)
 
 @customers.route('/customers/addHistory', methods=['GET'])
 def addHistory():
@@ -48,11 +50,17 @@ def addHistory():
     userID = request.args['userID'] 
     searchDate = request.args['searchDate']
     itemName = request.args['itemName']
+    error = False
 
-    response = {'update' : False}
-    if userID is not None and itemCode is not None:
-        sql = "INSERT INTO history (userID, searchedDate, itemName) VALUES (%s, %s, %s)"
-        conn.cursor.execute(sql, (userID, searchDate, itemName, ))
-        response['update'] = True
-    return response
+    response = {'update' : 'null'}
+    if userID != 'null':
+        try:
+            sql = "INSERT INTO history (userID, searchedDate, itemName) VALUES (%s, %s, %s)"
+            conn.cursor.execute(sql, (userID, searchDate, itemName, ))
+            response['update'] = 'done'
+        except Exception as err:
+            response['error'] = err
+            error = True
+    
+    return sendResponse(response,error)
 
