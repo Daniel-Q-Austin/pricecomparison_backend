@@ -9,7 +9,7 @@ conn = Connect('database.txt')
 cursor = conn.cursor
 savedItems = Blueprint('savedItems',__name__)
 
-@savedItems.route('/savedItems/addNewItem',methods=['POST'])
+@savedItems.route('/savedItems/addNewItem',methods=['GET'])
 def addNewItem(): 
     email = request.args['email']
     company_name = request.args['company_name']
@@ -33,7 +33,7 @@ def addNewItem():
     connection.commit()
     return sendResponse(response,error)
 
-@savedItems.route("/savedItems/removeItem", methods=["DELETE"])
+@savedItems.route("/savedItems/removeItem", methods=["GET"])
 def removeItem():
     itemCode = request.args['itemCode']
     response = {'result' : 'null'}
@@ -50,7 +50,7 @@ def removeItem():
     
     return sendResponse(response,error)
 
-@savedItems.route("/savedItems/cleanCart", methods=["DELETE"])
+@savedItems.route("/savedItems/cleanCart", methods=["GET"])
 def cleanCart():
     userID = request.args['userID']
     response = {'result': 'null'}
