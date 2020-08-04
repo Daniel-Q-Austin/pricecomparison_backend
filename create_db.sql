@@ -20,9 +20,9 @@ CREATE TABLE IF NOT EXISTS `priceaid`.`saved_table` (
     `itemID` INT NOT NULL AUTO_INCREMENT,
     `name` NVARCHAR(255) NOT NULL,
     `url` NVARCHAR(255) NOT NULL,
-	`email` NVARCHAR(255) NOT NULL,
 	`price` DECIMAL(6,2) NOT NULL,
 	`company_name` NVARCHAR(255) NOT NULL,
+	`image_url` NVARCHAR(255) NOT NULL,
     PRIMARY KEY(`itemID`),
     CONSTRAINT `FK_tbladministrator_tblsaved_table_userID` FOREIGN KEY (`userID`) REFERENCES `priceaid`.`administrator` (`userID`)
 );
