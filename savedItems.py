@@ -34,12 +34,12 @@ def addNewItem():
 
 @savedItems.route("/savedItems/removeItem", methods=["GET"])
 def removeItem():
-    itemCode = request.args['itemCode']
+    itemID = request.args['itemID']
     response = {'result' : 'null'}
     error = False
 
     try:
-        cursor.execute("DELETE FROM saved_table WHERE itemCode = '{}'".format(itemCode))
+        cursor.execute("DELETE FROM saved_table WHERE itemID = '{}'".format(itemID))
         count = cursor.rowcount      
         response['result'] = 'done'
     except Exception as err:
@@ -78,7 +78,7 @@ def displayData():
 
         for item in result:
             response['result'].append({
-                'itemCode' : item[1],
+                'itemID' : item[1],
                 'name' : item[2],
                 'url' : item[3],
                 'price' : str(item[4]),
