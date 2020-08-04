@@ -24,17 +24,17 @@ def isLoggedIn():
     error = False
     loggedIn = False
     userID = request.args['userID']
+    response = {'userID': userID, 'loggedIn': loggedIn}
 
     try:    
         if userID != 'null':
             sql = "SELECT loginStatus FROM administrator WHERE userID = %s"
             conn.cursor.execute(sql, (userID,))
-            loggedIn = conn.cursor.fetchone()[0] == 1
+            response['loggedIn'] = conn.cursor.fetchone()[0] == 1
     except Exception as err:
         response['error'] = str(err)
         error = True
-
-    response = {'userID': userID, 'loggedIn': loggedIn}
+        
     return sendResponse(response, error)
 
 @administrator.route('/administration/logIn', methods=['GET'])
