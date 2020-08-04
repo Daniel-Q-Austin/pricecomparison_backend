@@ -73,7 +73,18 @@ def displayData():
     try:
         #Displays all data in the saved items table, used for debugging.
         cursor.execute("SELECT * FROM saved_table WHERE userID = '{}'".format(userID))
-        response['result'] = cursor
+        result = cursor.fetchall()
+        response['result'] = []
+
+        for item in result:
+            response['result'].append({
+                'itemCode' : item[1],
+                'name' : item[2],
+                'url' : item[3],
+                'price' : str(item[4]),
+                'company_name' : item[5],
+                'image_url' : item[6]
+            }) 
     except Exception as err:
         response['error'] = str(err)
         error = True
