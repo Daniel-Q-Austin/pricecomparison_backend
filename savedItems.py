@@ -11,18 +11,18 @@ savedItems = Blueprint('savedItems',__name__)
 
 @savedItems.route('/savedItems/addNewItem',methods=['GET'])
 def addNewItem(): 
-    email = request.args['email']
     company_name = request.args['company_name']
     name = request.args['name']
     userID = request.args['userID']
     url = request.args['url']
+    image_url = request.args['image_url'] 
     price = request.args['price']
     error = False
 
     response = {'result' : 'null'}
     #Adds a saved item
-    sql = 'INSERT INTO saved_table (userID, name, url, email, price, company_name) VALUES (%s, %s, %s, %s, %s, %s)'
-    val = (userID, name, url, email, price, company_name)
+    sql = 'INSERT INTO saved_table (userID, name, url, price, company_name,image_url) VALUES (%s, %s, %s, %s, %s, %s, %s)'
+    val = (userID, name, url, price, company_name, image_url)
     try:
         cursor.execute(sql, val)
         response['result'] = 'done'
