@@ -24,13 +24,13 @@ def api_all():
 			search = request.args['search']
 		else:
 			response['error_2'] = "Error: No search field provided. Please search for products."
-        link = "https://api.bestbuy.com/v1/products(search={})?format=json&show=name,salePrice,addToCartUrl,largeImage&apiKey=N0ReEPP28MPw3Gd2xSIAQ5dM".format(search)
-        data = json.loads(urllib.request.urlopen(link).read().decode())
-        products = data['products']
-        for item in products:
-            item['url']  = item.pop('addToCartUrl')
-            item['retailer'] = 'BestBuy'
-        products = sorted(products, key = lambda i: i['salePrice']) 
+		link = "https://api.bestbuy.com/v1/products(search={})?format=json&show=name,salePrice,addToCartUrl,largeImage&apiKey=N0ReEPP28MPw3Gd2xSIAQ5dM".format(search)
+		data = json.loads(urllib.request.urlopen(link).read().decode())
+		products = data['products']
+		for item in products:
+			item['url']  = item.pop('addToCartUrl')
+			item['retailer'] = 'BestBuy'
+		products = sorted(products, key = lambda i: i['salePrice']) 
 		response['result'] = products
 	except Exception as err:
 		response['error'] = str(err)
