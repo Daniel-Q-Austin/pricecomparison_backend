@@ -21,7 +21,7 @@ def addNewItem():
 
     response = {'result' : 'null'}
     #Adds a saved item
-    sql = 'INSERT INTO saved_table (userID, name, url, price, company_name,image_url) VALUES (%s, %s, %s, %s, %s, %s, %s)'
+    sql = 'INSERT INTO saved_table (userID, name, url, price, company_name,image_url) VALUES (%s, %s, %s, %s, %s, %s)'
     val = (userID, name, url, price, company_name, image_url)
     try:
         cursor.execute(sql, val)
@@ -29,8 +29,7 @@ def addNewItem():
     except Exception as err:
         response['error'] = str(err)
         error = True
-
-    connection.commit()
+   
     return sendResponse(response,error)
 
 @savedItems.route("/savedItems/removeItem", methods=["GET"])
@@ -41,8 +40,7 @@ def removeItem():
 
     try:
         cursor.execute("DELETE FROM saved_table WHERE itemCode = '{}'".format(itemCode))
-        count = cursor.rowcount
-        connection.commit()
+        count = cursor.rowcount      
         response['result'] = 'done'
     except Exception as err:
         response['error'] = str(err)
@@ -58,8 +56,7 @@ def cleanCart():
 
     try:
         #Emptys all saved items
-        cursor.execute("DELETE FROM saved_table WHERE userID = '{}'".format(userID))
-        connection.commit()
+        cursor.execute("DELETE FROM saved_table WHERE userID = '{}'".format(userID))    
         response['result'] = 'done'
     except Exception as err:
         response['error'] = str(err)
